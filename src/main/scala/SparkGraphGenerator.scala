@@ -12,7 +12,7 @@ object SparkGraphGenerator {
     val n: Long = args(1).toLong
     val e: Long = ((2.0 / 3.0) * n * math.log(n) + (0.38481 * n)).toLong
     val directed: Boolean = if (args.contains("-u")) false else true
-    println(s"Creating ${if (!directed) "un"}directed graph with $n nodes and $e edges")
+    println(s"Creating ${if (directed) "" else "un"}directed graph with $n nodes and $e edges")
 
     val distData = spark.sparkContext.range(0, e)
     val pairs = distData.map(x => (new RMat().generateEdge(n)._1, 1))
@@ -21,7 +21,7 @@ object SparkGraphGenerator {
 
     val path = System.getProperty("user.dir")
     val timestamp = System.currentTimeMillis()
-    edges.saveAsTextFile(s"$path/${if (!directed) "un"}directed-graph-$timestamp")
+    edges.saveAsTextFile(s"$path/${if (directed) "" else "un"}directed-graph-$timestamp")
   }
 
   def createDirectedEdges(source: Long, degree: Int): Array[(Long, Long)] = {
