@@ -16,8 +16,9 @@ object SparkGraphGenerator {
     val directed: Boolean = if (args.contains("-u")) false else true
     println(s"Creating ${if (directed) "" else "un"}directed graph with $n nodes and $e edges")
 
-    val distData = spark.sparkContext.range(0, e)
-    val pairs = distData.map(x => (generateEdge(n)._1, 1))
+    val completeNodesSlice = spark.sparkContext.range(0, n).map(x => (x, 1))
+    val fillingSlice = spark.sparkContext.range(0, e - n).map(x => (generateEdge(n)._1, 1))
+    val pairs = completeNodesSlice ++ fillingSlice
     val degrees = pairs.reduceByKey(_ + _)
     val edges = if (directed) degrees.flatMap(pair => createDirectedEdges(pair._1, pair._2)) else degrees.flatMap(pair => createUndirectedEdges(pair._1, pair._2, n))
 
