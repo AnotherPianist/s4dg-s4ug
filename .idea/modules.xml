@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SparkGraphGenerator.iml" filepath="$PROJECT_DIR$/.idea/modules/SparkGraphGenerator.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SparkGraphGenerator-build.iml" filepath="$PROJECT_DIR$/.idea/modules/SparkGraphGenerator-build.iml" />
-    </modules>
-  </component>
-</project>
