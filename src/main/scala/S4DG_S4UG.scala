@@ -1,15 +1,13 @@
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.util.Random
 
-object SparkGraphGenerator {
+object S4DG_S4UG {
   def main(args: Array[String]): Unit = {
     if (args.length < 2) {
       println("Invalid parameters. Usage: \"spark-submit [filename.jar] [-d/-u] [num of nodes] [-r] [randomness]\"")
       sys.exit(-1)
     }
-
-    val spark = SparkSession.builder().appName("SparkGraphGenerators").getOrCreate()
 
     val n: Long = args(1).toLong
     val e: Long = ((2.0 / 3.0) * n * math.log(n) + (0.38481 * n)).toLong
@@ -17,8 +15,12 @@ object SparkGraphGenerator {
     val directed: Boolean = if (args.contains("-u")) false else true
     println(s"Creating ${if (directed) "" else "un"}directed graph with $n nodes and $e edges")
 
-    val completeNodesSlice = spark.sparkContext.range(0, n).map(x => (x, 1))
-    val fillingSlice = spark.sparkContext.range(0, e - n).map(x => (generateEdge(n)._1, 1))
+    val conf = new SparkConf().setAppName("S4DG - S4UG")
+    val sc = new SparkContext(conf)
+    sc.setLogLevel("ERROR")
+
+    val completeNodesSlice = sc.range(0, n).map(x => (x, 1))
+    val fillingSlice = sc.range(0, e - n).map(_ => (generateEdge(n)._1, 1))
     val pairs = completeNodesSlice ++ fillingSlice
     val degrees = pairs.reduceByKey(_ + _)
     val edges = degrees.flatMap(pair => if (directed) createDirectedEdges(pair._1, pair._2, r) else createUndirectedEdges(pair._1, pair._2, n, r))
@@ -47,7 +49,7 @@ object SparkGraphGenerator {
       }
       target += 1
     }
-    return edges
+    edges
   }
 
   def createUndirectedEdges(source: Long, degree: Int, n: Long, randomness: Double = 1.0): Array[(Long, Long)] = {
@@ -69,7 +71,7 @@ object SparkGraphGenerator {
       }
       target += 1
     }
-    return edges
+    edges
   }
 
   def generateEdge(n: Long): (Long, Long) = {
@@ -103,10 +105,10 @@ object SparkGraphGenerator {
 
     val r = Random.nextDouble()
     if (xn - x1 == 0 && yn - y1 == 1)
-      return if (r < 0.5) (x1, y1) else (x1, yn)
+      if (r < 0.5) (x1, y1) else (x1, yn)
     else if (xn - x1 == 1 && yn - y1 == 0)
-      return if (r < 0.5) (x1, y1) else (xn, yn)
+      if (r < 0.5) (x1, y1) else (xn, yn)
     else
-      return (x1, y1)
+      (x1, y1)
   }
 }
